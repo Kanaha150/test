@@ -1,31 +1,147 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Earth poles</title>
-    </head>
-    <body>
-        <h2>Earth Poles Viewer</h2>
-        <img id="myImage" src="images/north.svg"><br>
-        <input type="button" value="North Pole" id="north">
-        <input type="button" value="South Pole" id="south">
-        <script>
-            function showNorth() {
-                document
-                    .getElementById("myImage")
-                    .src = "images/north.svg";
-            }
-            function showSouth() {
-                document
-                    .getElementById("myImage")
-                    .src = "images/south.svg";
-            }
-            document
-                .getElementById("north")
-                .addEventListener("click", showNorth);
-            document
-                .getElementById("south")
-                .addEventListener("click", showSouth);
-        </script>
-    </body>
-</html>
 
+<head>
+    <title>Shelf life map</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link href="https://fonts.googleapis.com/css?family=Noto+Sans" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Lora" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/georaster"></script>
+    <script src="https://unpkg.com/proj4"></script>
+    <script src="https://unpkg.com/georaster-layer-for-leaflet"></script>
+    <script src="https://unpkg.com/chroma-js"></script>
+
+
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+            background-color: "whitesmoke";
+            font-family: "Noto Sans", sans-serif;
+            color: #3d3d3d;
+        }
+
+        #title {
+            position: fixed;
+            margin-top: 0;
+            top: 10px;
+            left: 55px;
+            font-size: 2em;
+            font-family: "Lora", serif;
+            letter-spacing: .04em;
+            padding: 10px 15px;
+            background-color: rgba(255, 255, 255, 0.5);
+            border: 1px solid grey;
+            border-radius: 3px;
+            z-index: 800;
+        }
+
+        #description h2 {
+            font-family: "Lora", serif;
+            letter-spacing: .04em;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            width: 100%;
+        }
+
+        #description {
+            position: fixed;
+            bottom: 20px;
+            left: 10px;
+            width: 280px;
+            padding: 0px 15px;
+            background-color: rgba(255, 255, 255, 0.7);
+            border: 1px solid grey;
+            border-radius: 3px;
+            z-index: 800;
+        }
+
+        #description p {
+            font-size: .9em;
+            line-height: 1.5em;
+        }
+
+        #description a {
+            color: #005daa;
+            text-decoration: none;
+        }
+
+        #description a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <h1 id="title">Shelf life map</h1>
+    <div id="map"></div>
+    <div id="description">
+        <h2>About this map</h2>
+        <p>This is a part of <a href="https://yourvcca.org/india/" target="_blank">YourVCCA </a> project. The map demonstrates the shelf life of banana in January 2020. </p>
+        <p>The calculations to derive the shelf life were conducted using the temperature data from ERA5.</p>
+        <p>Map authored by Kanaha Shoji</p>
+        <p><a href="https://github.com/GeoTIFF/georaster-layer-for-leaflet-example" target="_blank">Examples by Michael Dorman </a> were used to develop this web map</p>
+    </div>
+    <script>
+        // initalize leaflet map
+        var map = L.map("map").setView([21, 79], 5);
+
+        // add OpenStreatMap basemap
+        L.tileLayer("https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_nolabels/{z}/{x}/{y}.png", {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attribution/">CartoDB</a>',
+            subdomains: "abcd",
+            maxZoom: 19
+        }).addTo(map);
+
+
+        // image saved in Github
+        var url_to_geotiff_file = "https://kanaha150.github.io/test/images/ind_sl_gain_banana_01_nodatavaleNull.tif";
+
+        fetch(url_to_geotiff_file)
+            .then(response => response.arrayBuffer())
+            .then(arrayBuffer => {
+                parseGeoraster(arrayBuffer).then(georaster => {
+                    const min = georaster.mins[0];
+                    const max = georaster.maxs[0];
+                    const range = georaster.ranges[0];
+
+
+                    // available color scales can be found by running console.log(chroma.brewer);
+                    console.log(chroma.brewer);
+                    var scale = chroma.scale("Viridis");
+
+                    var layer = new GeoRasterLayer({
+                        georaster: georaster,
+                        opacity: 0.7,
+                        pixelValuesToColorFn: function (pixelValues) {
+                            var pixelValue = pixelValues[0]; // there's just one band in this raster
+
+                            // if there's zero wind, don't return a color
+                            if (pixelValue === NaN) return null;
+
+                            // scale to 0 - 1 used by chroma
+                            var scaledPixelValue = (pixelValue - min) / range;
+
+                            var color = scale(scaledPixelValue).hex();
+
+                            return color;
+                        },
+                        resolution: 64
+                    });
+                    console.log("layer:", layer);
+                    layer.addTo(map);
+
+                    map.fitBounds(layer.getBounds());
+                });
+            });
+
+    </script>
+</body>
+
+</html>
