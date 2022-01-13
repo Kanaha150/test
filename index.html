@@ -14,8 +14,138 @@
     <script src="https://unpkg.com/georaster-layer-for-leaflet"></script>
     <script src="https://unpkg.com/chroma-js"></script>
 
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
 
     <style>
+        #map {
+            height: 900px;
+        }
+        
+        .container {
+            margin-top: 20px;
+            margin-bottom: 40px;
+        }
+        
+        table tbody tr td {
+            font-size: 12px;
+        }
+        
+        table thead tr th {
+            font-size: 12px;
+        }
+        
+        .modebar {
+            display: none !important;
+        }
+        
+        th {
+            padding: 10px;
+            font-weight: bold;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        #region_details {
+            padding: 2px;
+        }
+        
+        #project_details {
+            padding: 5px;
+            margin: 5px;
+        }
+        
+        .total-box {
+            font: 18px/20px;
+            font-weight: 500;
+            color: #023858;
+            background: white;
+            border: 1px solid;
+            border-color: rgba(0, 0, 0, 0.2);
+            text-align: center;
+            padding: 5px;
+            margin: 5px;
+        }
+        
+        .infobox {
+            padding: 6px 8px;
+            font: 14px/16px;
+            background: white;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+        }
+        
+        .infobox h4 {
+            margin: 0 0 5px;
+            color: #777;
+        }
+        
+        .legend {
+            line-height: 20px;
+            color: #555;
+            padding: 6px 8px;
+            font: 14px/16px;
+            background: white;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+        }
+        
+        .legend i {
+            width: 18px;
+            height: 18px;
+            float: left;
+            margin-right: 8px;
+            opacity: 0.5;
+        }
+        /* clear fix */
+        
+        .grid:after {
+            content: '';
+            display: block;
+            clear: both;
+        }
+        
+        .grid-item {
+            position: relative;
+            float: left;
+            width: 220;
+            height: 50px;
+            margin: 10px;
+            padding: 0px;
+        }
+        
+        .btn {
+            margin-bottom: 10px;
+        }
+        
+        .text-div {
+            word-wrap: break-word;
+        }
+        
+        .stackedtext-div {
+            float: right;
+            word-wrap: break-word;
+        }
+        
+        .grid-item>* {
+            margin: 0;
+            padding: 0;
+        }
+        
+        .chart-text {
+            font-size: 10px;
+        }
+        
         body {
             padding: 0;
             margin: 0;
@@ -44,16 +174,28 @@
             letter-spacing: .04em;
         }
         
-        #map {
-            position: absolute;
-            top: 0;
-            height: 100%;
+        #content {
+            position: relative;
+            top: 100px;
+            height: 500px;
             width: 100%;
+        }
+        
+        #slidecontainer {
+            position: fixed;
+            bottom: 20px;
+            right: 10px;
+            width: 280px;
+            padding: 15px 15px;
+            background-color: rgba(255, 255, 255, 0.7);
+            border: 1px solid grey;
+            border-radius: 3px;
+            z-index: 800;
         }
         
         #description {
             position: fixed;
-            bottom: 20px;
+            bottom: 50px;
             left: 10px;
             width: 280px;
             padding: 0px 15px;
@@ -80,25 +222,6 @@
         .popup {
             text-align: center;
         }
-        
-        .legend {
-            padding: 6px 8px;
-            background-color: rgba(255, 255, 255, 0.8);
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-            border-radius: 5px;
-        }
-        
-        .legend i {
-            width: 18px;
-            height: 18px;
-            float: left;
-            margin-right: 8px;
-            opacity: 0.7;
-        }
-        
-        div.legend.leaflet-control br {
-            clear: both;
-        }
     </style>
 </head>
 
@@ -107,315 +230,311 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/leaflet-timedimension@1.1.1/dist/leaflet.timedimension.min.js"></script>
     <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
 
+    <!-- <h1 id="title">Shelf life gain map</h1> -->
 
-    <h1 id="title">Shelf life gain map</h1>
     <div id="map"></div>
+
+
     <div id="description">
         <h2>About this map</h2>
-        <p>This is a part of <a href="https://yourvcca.org/india/" target="_blank">YourVCCA </a> project. The map demonstrates the shelf life gain of banana that one can get by storing in coooling in comparison to under ambient temperature n 2020. </p>
+        <p>This is a part of <a href="https://yourvcca.org/india/" target="_blank">YourVCCA </a> project. The map in this version demonstrates the shelf life gain of banana that one can get by evaporative cooling in comparison to under ambient temperature
+            n 2020. </p>
         <p>The calculations to derive the shelf life were conducted using the temperature data from ERA5.</p>
         <p>Map authored by Kanaha Shoji</p>
         <p><a href="https://github.com/GeoTIFF/georaster-layer-for-leaflet-example" target="_blank">Examples by Michael
                 Dorman </a> were used to develop this web map</p>
     </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4">
+            </div>
+            <div class="col-md-8">
+                <h1 id="title">Shelf life gain map</h1>
+                <p id="last_update">Shelf life gain in days by cooling</p>
+
+                <button type="buttons" id="btnBanana" class="btn btn-success btn-sm">Banana</button>
+                <button type="buttons" id="btnApple" class="btn btn-success btn-sm">Apple</button>
+                <button type="buttons" id="btnPotato" class="btn btn-success btn-sm">Potato</button>
+                <button type="buttons" id="btnTomato" class="btn btn-success btn-sm">Tomato</button>
+
+                <button type="buttons" id="btnIND" class="btn btn-secondary btn-sm">India</button>
+                <button type="buttons" id="btnNGA" class="btn btn-secondary btn-sm">Nigeria</button>
 
 
 
-    </div>
-    <script>
-        // add OpenStreatMap basemap
-        var simpleMap = L.tileLayer("https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_nolabels/{z}/{x}/{y}.png", {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attribution/">CartoDB</a>',
-            subdomains: "abcd",
-            maxZoom: 19
-        });
+                <div id="project_details">
+                    <small class="text-muted">Created by <a href = "https://www.empa.ch/web/simbiosys/data.org" target="blank">SimBioSys group at Empa</a> as a part of <a href="https://energy-base.org/projects/your-virtual-cold-chain-assistant/" target="blank">Data.org project</a>. </small>
+                </div>
+            </div>
 
-        var openTopoMap = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
-            maxZoom: 17,
-            attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
-        });
-        var stamen_Terrain = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}{r}.{ext}', {
-            attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-            subdomains: 'abcd',
-            minZoom: 0,
-            maxZoom: 18,
-            ext: 'png'
-        });
-
-        // initalize leaflet map
-        var map = L.map('map', {
-            center: [21, 79],
-            zoom: 5,
-            layers: [simpleMap]
-        });
+        </div>
+        <div id="slidecontainer">
+            <input type="range" min="1" max="100" value="1" class="slider" id="slider"><label id="sliderLabel"></label>
+            <button id="play">Play</button><button id="stop">Stop</button>
+        </div>
 
 
-        var baseMaps = {
-            "Simple": simpleMap,
-            "Topo": openTopoMap,
-            "Terrain": stamen_Terrain
-        };
+        <script>
+            var simpleMap = L.tileLayer("https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_nolabels/{z}/{x}/{y}.png", {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attribution/">CartoDB</a>',
+                subdomains: "abcd",
+                maxZoom: 19
+            });
 
-        L.control.layers(baseMaps).addTo(map);
-
-
-        // slider elements ///////////////////////////////////////////////
-        var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-
-        // add all your years here (e.g. [1982,1983,1984,1985])
-        var years = [2020]
-
-        //storing all possible times
-        var timeValues = []
-        for (var i in years) {
-            for (var y in months) {
-                timeValues.push(months[y] + "_" + years[i])
-            }
-        }
-
-        // //setting max value of the slider
-        // document.getElementById("slider").max = "" + timeValues.length + "";
-
-        // //setting default label of the slider
-        // document.getElementById("sliderLabel").innerHTML = timeValues[0]
-
-        //change the prefix of the url if your images are not in the same folder as your script
-        var urlPrefix = "https://kanaha150.github.io/test/images/"
-
-        var url = []
-        for (var i = 0; i < timeValues.length; i++) {
-            url.push(urlPrefix + timeValues[i] + ".geojson")
-        };
-
-
-
-        // for coloring ///////////////////////////////////////////////////
-        var classBreaks = [0, 2, 4, 6, 8];
-        var colorHex = "Viridis";
-
-        function pix_style(feature) {
-            return {
-                fillColor: getColor(feature.properties.slGainBanana2020, classBreaks, colorHex),
-                weight: 0.1,
-                opacity: 1,
-                color: "black",
-                fillOpacity: 0.5
+            var openTopoMap = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+                maxZoom: 17,
+                attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
+            });
+            var stamen_Terrain = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}{r}.{ext}', {
+                attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                subdomains: 'abcd',
+                minZoom: 0,
+                maxZoom: 18,
+                ext: 'png'
+            });
+            var map = L.map('map', {
+                center: [21, 79],
+                zoom: 5,
+                layers: [simpleMap]
+            });
+            var basemaps = {
+                "Simple": simpleMap,
+                "Topo": openTopoMap,
+                "Terrain": stamen_Terrain
             };
-        }
 
-        //TimeDimention elements /////////////////////////////////////////
+            L.control.layers(basemaps).addTo(map);
 
-        // Create Leaflet control object for legend
-        var legend = L.control({
-            position: "topright"
-        });
+            // create charts default to India
+            var statscanRegion = 'India';
 
-        // Function that runs when legend is added to map
-        legend.onAdd = function() {
-            // Create <div> element and populate it with HTML
-            var div = L.DomUtil.create('div', 'legend');
-            // div.innerHTML += '<i style="background: #ffffff;"></i>0<br>';
-            classBreaks.push(999); // add dummy class to extend to get last class color, chroma only returns class.length - 1 colors
-            for (var i = 0; i < classBreaks.length; i++) {
-                if (i + 2 === classBreaks.length) {
-                    div.innerHTML += '<i style="background: ' + getColor(classBreaks[i], classBreaks, colorHex) + '"></i> ' +
-                        classBreaks[i] + '+';
-                    break
-                } else {
-                    div.innerHTML += '<i style="background: ' + getColor(classBreaks[i], classBreaks, colorHex) + '"></i> ' +
-                        classBreaks[i] + '-' + classBreaks[i + 1] + '<br>';
+
+            var bounds = new L.LatLngBounds(
+                new L.LatLng(34.4, 68.3),
+                new L.LatLng(6.7, 97.5));
+            map.fitBounds(bounds);
+
+            var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul',
+                'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+            ]
+
+            // add all your years here (e.g. [1982,1983,1984,1985])
+            var years = [2020]
+
+            //storing all possible times
+            var timeValues = []
+            for (var i in years) {
+                for (var y in months) {
+                    timeValues.push(months[y] + "_" + years[i])
                 }
             }
 
-            return div;
+            //setting max value of the slider
+            document.getElementById("slider").max = "" + timeValues.length + "";
 
-        };
+            //setting default label of the slider
+            document.getElementById("sliderLabel").innerHTML = timeValues[0]
 
-        // Add Legend to Map
-        legend.addTo(map);
+            //change the prefix of the url if your images are not in the same folder as your script
+            var urlPrefix = "https://kanaha150.github.io/test/images/"
+            var playTimeOut;
 
-        // get color based on map metric
-        function getColor(n, classBreaks, colorHex) {
-            var mapScale = chroma.scale(colorHex).classes(classBreaks);
-            var regionColor = mapScale(n).hex();
-            return regionColor
-        }
+            // get color based on map metric
+            function getColor(n, classBreaks, colorHex) {
+                var mapScale = chroma.scale(colorHex).classes(classBreaks);
+                var regionColor = mapScale(n).hex();
+                return regionColor
+            }
 
-        var controlLayers = L.control.layers().addTo(map);
+            // set default map, chroma, chart and region detail variables
+            var mapMetric = 'Banana';
+            var classBreaks = [0, 2, 4, 6, 8];
+            var colorHex = "Viridis";
+            var zoomCenter = ['21', '79'];
+            var zoomMag = 4;
+            var url = urlPrefix + mapMetric + "_" + timeValues[0] + ".png";
+            var imageOverlay = new L.ImageOverlay(url, bounds, {
+                opacity: 0.5,
+                interactive: false,
+            });
+            var val = 1;
+
+            // initialize with default variables
+            updateMap(mapMetric, classBreaks, colorHex, val);
+            // update map, called by initial above, and map metric buttons
+            function updateMap(mapMetric, classBreaks, colorHex, val) {
 
 
-        $.getJSON(url[0], function(data) {
-            var geojsonLayer = L.geoJSON(data, {
-                style: pix_style,
-                onEachFeature: function(feature, layer) {
-                    layer.bindPopup(
-                        '<div class="popup">' +
-                        "Banana shelf life gain (days)" + '<br>' +
-                        '<b>' + feature.properties.slGainBanana2020 + '</b>' +
-                        '</div>'
-                    );
+                function loadImage(e) {
+                    if (map.hasLayer(imageOverlay)) {
+                        map.removeLayer(imageOverlay)
+                    }
+                };
+                imageOverlay.addTo(map);
+
+                var val = document.getElementById("slider").value - 1;
+                imageOverlay.setUrl(urlPrefix + mapMetric + "_" + timeValues[val] + ".png");
+
+                //function when sliding
+                slider.oninput = function() {
+                    //changing the label
+                    document.getElementById("sliderLabel").innerHTML = timeValues[this.value - 1]
+                        //setting the url of the overlay
+                    imageOverlay.setUrl(urlPrefix + mapMetric + "_" + timeValues[this.value - 1] + ".png");
+                    // var val = this.value;
+                    // return val;
+                };
+                // return val;
+                // imageOverlay.setUrl(urlPrefix + mapMetric + "_" + timeValues[val] + ".png");
+
+                function play() {
+                    playTimeOut = setTimeout(function() {
+                        //increasing the slider by 1 (if not already at the end)
+                        var val = document.getElementById("slider").value;
+                        console.log(val)
+                            //if end of slider, stopping
+                        if (val == document.getElementById("slider").max - 1) {
+                            clearTimeout(playTimeOut);
+                            //hidding the stop button
+                            document.getElementById('stop').style.display = "none";
+                            //showing the play button
+                            document.getElementById('play').style.display = "block";
+                        } else {
+                            document.getElementById("slider").value = Number(val) + 1
+                            play()
+                        }
+                        //changing the label
+                        document.getElementById("sliderLabel").innerHTML = timeValues[Number(val)]
+                            //setting the url of the overlay
+                        imageOverlay.setUrl(urlPrefix + mapMetric + "_" + timeValues[Number(val)] + ".png")
+                            // return val;
+                    }, 1000);
                 }
-            }).addTo(map);
-            controlLayers.addOverlay(geojsonLayer, 'Banana Jan 2020');
-        });
 
 
-        $.getJSON(url[1], function(data) {
-            var geojsonLayer = L.geoJSON(data, {
-                style: pix_style,
-                onEachFeature: function(feature, layer) {
-                    layer.bindPopup(
-                        '<div class="popup">' +
-                        "Banana shelf life gain (days)" + '<br>' +
-                        '<b>' + feature.properties.slGainBanana2020 + '</b>' +
-                        '</div>'
-                    );
+                document.getElementById('play').onclick = function(e) {
+                    play()
+                        //showing the stop button
+                    document.getElementById('stop').style.display = "block";
+                    //hidding the play button
+                    document.getElementById('play').style.display = "none";
                 }
-            }).addTo(map);
-            controlLayers.addOverlay(geojsonLayer, 'Banana Feb 2020');
-        });
 
-        $.getJSON(url[2], function(data) {
-            var geojsonLayer = L.geoJSON(data, {
-                style: pix_style,
-                onEachFeature: function(feature, layer) {
-                    layer.bindPopup(
-                        '<div class="popup">' +
-                        "Banana shelf life gain (days)" + '<br>' +
-                        '<b>' + feature.properties.slGainBanana2020 + '</b>' +
-                        '</div>'
-                    );
+                document.getElementById('stop').onclick = function(e) {
+                    clearTimeout(playTimeOut);
+                    //hidding the stop button
+                    document.getElementById('stop').style.display = "none";
+                    //showing the play button
+                    document.getElementById('play').style.display = "block";
                 }
-            }).addTo(map);
-            controlLayers.addOverlay(geojsonLayer, 'Banana Mar 2020');
-        });
-        $.getJSON(url[3], function(data) {
-            var geojsonLayer = L.geoJSON(data, {
-                style: pix_style,
-                onEachFeature: function(feature, layer) {
-                    layer.bindPopup(
-                        '<div class="popup">' +
-                        "Banana shelf life gain (days)" + '<br>' +
-                        '<b>' + feature.properties.slGainBanana2020 + '</b>' +
-                        '</div>'
-                    );
+
+                //hidding the stop button by default
+                document.getElementById('stop').style.display = "none";
+
+
+
+                // remove existing legend if exists
+                var legends = document.getElementsByClassName('legend');
+                while (legends.length > 0) {
+                    legends[0].remove();
                 }
-            }).addTo(map);
-            controlLayers.addOverlay(geojsonLayer, 'Banana Apr 2020');
-        });
-        $.getJSON(url[4], function(data) {
-            var geojsonLayer = L.geoJSON(data, {
-                style: pix_style,
-                onEachFeature: function(feature, layer) {
-                    layer.bindPopup(
-                        '<div class="popup">' +
-                        "Banana shelf life gain (days)" + '<br>' +
-                        '<b>' + feature.properties.slGainBanana2020 + '</b>' +
-                        '</div>'
-                    );
-                }
-            }).addTo(map);
-            controlLayers.addOverlay(geojsonLayer, 'Banana May 2020');
-        });
-        $.getJSON(url[5], function(data) {
-            var geojsonLayer = L.geoJSON(data, {
-                style: pix_style,
-                onEachFeature: function(feature, layer) {
-                    layer.bindPopup(
-                        '<div class="popup">' +
-                        "Banana shelf life gain (days)" + '<br>' +
-                        '<b>' + feature.properties.slGainBanana2020 + '</b>' +
-                        '</div>'
-                    );
-                }
-            }).addTo(map);
-            controlLayers.addOverlay(geojsonLayer, 'Banana Jun 2020');
-        });
-        $.getJSON(url[6], function(data) {
-            var geojsonLayer = L.geoJSON(data, {
-                style: pix_style,
-                onEachFeature: function(feature, layer) {
-                    layer.bindPopup(
-                        '<div class="popup">' +
-                        "Banana shelf life gain (days)" + '<br>' +
-                        '<b>' + feature.properties.slGainBanana2020 + '</b>' +
-                        '</div>'
-                    );
-                }
-            }).addTo(map);
-            controlLayers.addOverlay(geojsonLayer, 'Banana Jul 2020');
-        });
-        $.getJSON(url[7], function(data) {
-            var geojsonLayer = L.geoJSON(data, {
-                style: pix_style,
-                onEachFeature: function(feature, layer) {
-                    layer.bindPopup(
-                        '<div class="popup">' +
-                        "Banana shelf life gain (days)" + '<br>' +
-                        '<b>' + feature.properties.slGainBanana2020 + '</b>' +
-                        '</div>'
-                    );
-                }
-            }).addTo(map);
-            controlLayers.addOverlay(geojsonLayer, 'Banana Aug 2020');
-        });
-        $.getJSON(url[8], function(data) {
-            var geojsonLayer = L.geoJSON(data, {
-                style: pix_style,
-                onEachFeature: function(feature, layer) {
-                    layer.bindPopup(
-                        '<div class="popup">' +
-                        "Banana shelf life gain (days)" + '<br>' +
-                        '<b>' + feature.properties.slGainBanana2020 + '</b>' +
-                        '</div>'
-                    );
-                }
-            }).addTo(map);
-            controlLayers.addOverlay(geojsonLayer, 'Banana Sep 2020');
-        });
-        $.getJSON(url[9], function(data) {
-            var geojsonLayer = L.geoJSON(data, {
-                style: pix_style,
-                onEachFeature: function(feature, layer) {
-                    layer.bindPopup(
-                        '<div class="popup">' +
-                        "Banana shelf life gain (days)" + '<br>' +
-                        '<b>' + feature.properties.slGainBanana2020 + '</b>' +
-                        '</div>'
-                    );
-                }
-            }).addTo(map);
-            controlLayers.addOverlay(geojsonLayer, 'Banana Oct 2020');
-        });
-        $.getJSON(url[10], function(data) {
-            var geojsonLayer = L.geoJSON(data, {
-                style: pix_style,
-                onEachFeature: function(feature, layer) {
-                    layer.bindPopup(
-                        '<div class="popup">' +
-                        "Banana shelf life gain (days)" + '<br>' +
-                        '<b>' + feature.properties.slGainBanana2020 + '</b>' +
-                        '</div>'
-                    );
-                }
-            }).addTo(map);
-            controlLayers.addOverlay(geojsonLayer, 'Banana Nov 2020');
-        });
-        $.getJSON(url[11], function(data) {
-            var geojsonLayer = L.geoJSON(data, {
-                style: pix_style,
-                onEachFeature: function(feature, layer) {
-                    layer.bindPopup(
-                        '<div class="popup">' +
-                        "Banana shelf life gain (days)" + '<br>' +
-                        '<b>' + feature.properties.slGainBanana2020 + '</b>' +
-                        '</div>'
-                    );
-                }
-            }).addTo(map);
-            controlLayers.addOverlay(geojsonLayer, 'Banana Dec 2020');
-        });
-    </script>
+
+                // add updated legend
+                var legend = L.control({
+                    position: 'topright'
+                });
+                legend.onAdd = function(map) {
+                    var div = L.DomUtil.create('div', 'legend');
+                    div.innerHTML += '<span>' + mapMetric.replace(/_/g, ' ') + '</span><br>';
+                    div.innerHTML += '<i style="background:#ffffff"></i>0<br>';
+                    classBreaks.push(999); // add dummy class to extend to get last class color, chroma only returns class.length - 1 colors
+                    for (var i = 0; i < classBreaks.length; i++) {
+                        if (i + 2 === classBreaks.length) {
+                            div.innerHTML += '<i style="background:' + getColor(classBreaks[i], classBreaks, colorHex) + '"></i> ' +
+                                classBreaks[i] + '+';
+                            break
+                        } else {
+                            div.innerHTML += '<i style="background:' + getColor(classBreaks[i], classBreaks, colorHex) + '"></i> ' +
+                                classBreaks[i] + '&ndash;' + classBreaks[i + 1] + '<br>';
+                        }
+                    }
+                    return div;
+                };
+                legend.addTo(map);
+            }
+
+
+
+
+
+
+            // buttons to select map metrics
+            // btnBanana
+            document.getElementById("btnBanana").addEventListener("click", e => mapCaseTotal(e));
+            const mapCaseTotal = e => {
+                btnBanana();
+            };
+
+            function btnBanana() {
+                var mapMetric = 'Banana';
+                var classBreaks = [0, 2, 4, 6, 8];
+                var colorHex = "Viridis";
+                updateMap(mapMetric, classBreaks, colorHex);
+            }
+
+            // btnApple
+            document.getElementById("btnApple").addEventListener("click", e => mapCaseNew(e));
+            const mapCaseNew = e => {
+                var mapMetric = 'Apple';
+                var classBreaks = [0, 2, 4, 6, 8];
+                var colorHex = ['yellow', 'red', 'navy'];
+                updateMap(mapMetric, classBreaks, colorHex);
+            };
+
+            // btnPotato
+            document.getElementById("btnPotato").addEventListener("click", e => mapMortTotal(e));
+            const mapMortTotal = e => {
+                var mapMetric = 'Potato';
+                var classBreaks = [1, 10, 20, 50, 100, 200, 300, 400, 500];
+                var colorHex = ['#fee0d2', '#a50f15']; // red
+                updateMap(mapMetric, classBreaks, colorHex);
+            };
+
+            // btnTomato
+            document.getElementById("btnTomato").addEventListener("click", e => mapMortNew(e));
+            const mapMortNew = e => {
+                var mapMetric = 'Tomato';
+                var classBreaks = [1, 2, 5, 7, 10, 15, 20, 25];
+                var colorHex = ['#d4b9da', '#67001f']; // pink
+                var map;
+                updateMap(mapMetric, classBreaks, colorHex);
+            };
+
+
+            // buttons to change map focus by canada region
+            // btnIND
+            document.getElementById("btnIND").addEventListener("click", e => btnIND(e));
+            const btnIND = e => {
+                var lat = '21';
+                var lon = '79';
+                var mag = 5;
+                map.setView([lat, lon], mag);
+                var statscanRegion = 'India';
+            };
+
+            // btnNGA
+            document.getElementById("btnNGA").addEventListener("click", e => btnNGA(e));
+            const btnNGA = e => {
+                var lat = '9';
+                var lon = '9';
+                var mag = 6;
+                map.setView([lat, lon], mag);
+            };
+        </script>
+
+
 </body>
+
+</html>
 
 </html>
