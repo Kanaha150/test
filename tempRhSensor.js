@@ -62,7 +62,10 @@ const Unknown_Characteristic_1 = '00002235-b38d-4985-720e-0f993a68ee41';
                 // })
                 .then(value => {
                     // console.log(`Temp is ${value.getUint8(0)}`);
-                    console.log(`Temp is ${value.getUint8(0,true)}`);
+                    console.log(`Temp1 is ${value.getUint8(0,true)}`);
+                    console.log(`Temp2 is ${value.getUint16(0,true)}`);
+                    console.log(`Temp3 is ${value.getUint8(1,true)}`);
+                    console.log(`Temp4 is ${value.getUint16(1,true)}`);
                     console.log('Temp is ${value.getUint16(1,true)/100}');//getUint16(2, true) / 20
                 })
         }
