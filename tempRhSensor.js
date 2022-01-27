@@ -1,37 +1,19 @@
 (function() {
     'use strict';
-// Service UUID found based on NRF connect
-const Generic_Access_Primary_Service = 0x1800;
-const Generic_Attribute_Primary_Service = 0x1801;
-const Device_Information_Primary_Service = 0x180A;
-const Battery_Service_Primary_Service = 0x180F;
-const Unknown_Service_Primary_Service_1 = '0000f234-b38d-4985-720e-0f993a68ee41'; // same as Logger service UUID
-const Unknown_Service_Primary_Service_2 = '00001234-b38d-4985-720e-0f993a68ee41'; //same as RH service UUID
-const Unknown_Service_Primary_Service_3 = '00002234-b38d-4985-720e-0f993a68ee41'; // same as Temp service UUID
+// Service UUID found based on chrome://bluetooth-internals/#devices/ee:a8:9d:84:a5:41
+const service_UUID_1 = '00001234-b38d-4985-720e-0f993a68ee41';//maybe RH
+const service_UUID_2 = '00001800-0000-1000-8000-00805f9b34fb';//maybe access
+const service_UUID_3 = '00001801-0000-1000-8000-00805f9b34fb';//maybe attribute
+const service_UUID_4 = '0000180a-0000-1000-8000-00805f9b34fb';//maybe ifo
+const service_UUID_5 = '0000180f-0000-1000-8000-00805f9b34fb';//maybe battery
+const service_UUID_6 = '00002234-b38d-4985-720e-0f993a68ee41';//maybe Temp
+const service_UUID_7 = '0000f234-b38d-4985-720e-0f993a68ee41';//maybe logger
 
+//Chraracteristic UUID found based on chrome://bluetooth-internals/#devices/ee:a8:9d:84:a5:41 
+const characteristic_UUID_1 = '00002235-b38d-4985-720e-0f993a68ee41';//maybe Temp
+const characteristic_UUID_2 = '00001235-b38d-4985-720e-0f993a68ee41';//maybe RH
 
-    // Custom Bluetooth service UUID
-    const SENSIRION_DEVICE_INFO_SERVICE_UUID = 0x2800;// 180A; // 0x02010//0x180A;
-    const SENSIRION_LOGGER_SERVICE_UUID = 0xF234; // 0000F234-B38D-4985-720E-0F993A68EE41;
-    const SENSIRION_TEMP_SERVICE_UUID = 0x2234;//UUID.fromString("00002235-B38D-4985-720E-0F993A68EE41");//'00002234-B38D-4985-720E-0F993A68EE41';//0x2234; //
-    const SENSIRION_RH_SERVICE_UUID = 0x1234; // 00001234-B38D-4985-720E-0F993A68EE41;
-
-    // Custom Bluetooth Characteristic UUIDs
-    const SENSIRION_DEVICE_NAME_UUID = 0x2A00;
-    const SyncTimeMs_UUID = 0xF235; // 0000F235-B38D-4985-720E-0F993A68EE41;
-    const OldestTimestampMs_UUID = 0xF236; //0000F236-B38D-4985-720E-0F993A68EE41;
-    const NewestTimestampMs_UUID = 0xF237; //0000F237-B38D-4985-720E-0F993A68EE41;
-    const StartLoggerDownload_UUID = 0xF238; //0000F238-B38D-4985-720E-0F993A68EE41;
-    const LoggerIntervalMs_UUID = 0xF239; //0000F239-B38D-4985-720E-0F993A68EE41;
-
-    const SENSIRION_TEMP_UUID =0x2235; //00001235-B38D-4985-720E-0F993A68EE41; or maybe 0x1235????
-    const Temp_test_UUID_1 = 0x2901;
-    const Temp_test_UUID_2 = 0x2902;
-    const SENSIRION_RH_UUID = 0x1235; //00002235-B38D-4985-720E-0F993A68EE41; or maybe 0x2235???????
-
-//Chraracteristic UUID found based on NRF 
-//under 2234
-const Unknown_Characteristic_1 = '00002235-b38d-4985-720e-0f993a68ee41';
+//Descriptor UUID found based on chrome://bluetooth-internals/#devices/ee:a8:9d:84:a5:41 
 
     class TempRhSensor {
         constructor() {
@@ -42,8 +24,8 @@ const Unknown_Characteristic_1 = '00002235-b38d-4985-720e-0f993a68ee41';
         connect() {
             return navigator.bluetooth.requestDevice({ 
                 filters: [{ 
-                    name: 'Smart Humigadget'}],
-                optionalServices: [Generic_Access_Primary_Service, Generic_Attribute_Primary_Service,Device_Information_Primary_Service, Unknown_Service_Primary_Service_1,Unknown_Service_Primary_Service_2, Unknown_Service_Primary_Service_3,SENSIRION_TEMP_SERVICE_UUID] 
+                    name: 'adget'}],
+                optionalServices: [service_UUID_1, service_UUID_2,service_UUID_3,service_UUID_4,service_UUID_5,service_UUID_6,service_UUID_7] 
             })
                 .then(device => {
                     this.device = device;
@@ -51,38 +33,44 @@ const Unknown_Characteristic_1 = '00002235-b38d-4985-720e-0f993a68ee41';
                 })
                 .then(server => {
                     this.server = server;
-                    return server.getPrimaryService(Unknown_Service_Primary_Service_3);
+                    return server.getPrimaryService(service_UUID_6);
                 })
                 .then(service => {
-                    return this._cacheCharacteristic(service, Unknown_Characteristic_1);
-                    // return service.getCharacteristic(Unknown_Characteristic_1);
+                    return this._cacheCharacteristic(service, 
+                    characteristic_UUID_1);
+                    // return service.getCharacteristic(characteristic_UUID_1);
                 })
-                // .then(characteristic => {
-                //     return characteristic.readValue();
-                // })
                 .then(value => {
-                    // console.log(`Temp is ${value.getUint8(0)}`);
-                    console.log(`Temp1 is ${value.getUint8(0,true)}`);
-                    console.log(`Temp2 is ${value.getUint16(0,true)}`);
-                    console.log(`Temp3 is ${value.getUint8(1,true)}`);
-                    console.log(`Temp4 is ${value.getUint16(1,true)}`);
-                    console.log('Temp is ${value.getUint16(1,true)/100}');//getUint16(2, true) / 20
+                    console.log("value",value);
+                    let decoder = new TextDecoder('utf-8');
+                    let name = decoder.decode(value)
+                    this.outputvalue = name;
+                    this.lastupdate = new Date().toJSON();
+                    console.log('value is ' + name);
+                    // // console.log(`Temp is ${value.getUint8(0)}`);
+                    // // console.log(`Temp1 is ${value.getUint8(0,true)}`);
+                    // console.log(`Temp2 is ${value.getUint8(0)}`);
+                    // // console.log(`Temp3 is ${value.getUint8(1,true)}`);
+                    // console.log(`Temp4 is ${value.getUint16(1)}`);
+                    // // console.log(`Temp5 is ${value.getUint8(2,true)}`);
+                    // console.log(`Temp6 is ${value.getUint16(2,true)}`);
+                    // console.log('Temp is ${value.getUint16(1,true)/100}');//getUint16(2, true) / 20
                 })
         }
 
         /* Temp Service */
 
         startNotificationsTempRhMeasurement() {
-            return this._startNotifications(Unknown_Characteristic_1);
+            return this._startNotifications(characteristic_UUID_1);
         }
         stopNotificationsTempRhMeasurement() {
-            return this._stopNotifications(Unknown_Characteristic_1);
+            return this._stopNotifications(characteristic_UUID_1);
         }
         parseTempRh(value) {
             // In Chrome 50+, a DataView is returned instead of an ArrayBuffer.
             value = value.buffer ? value : new DataView(value);
             // let flags = value.getUint8(0);
-            let flags = value.getUint16(1, true)/100;
+            let flags = value.getUint16(0, true)/100;
             let rate16Bits = flags & 0x1;
             let result = {};
             let index = 1;
